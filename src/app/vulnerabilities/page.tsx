@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styles from '../page.module.css';
 import { Typography, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, Button, Grid } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation';
 
 interface Vulnerability {
     id: number;
@@ -19,14 +19,7 @@ interface Vulnerability {
     recommendations: string;
 }
 
-export default function Details(): JSX.Element {
-    const [deviceName, setDeviceName] = useState<string | null>(null);
-    const searchParams = useSearchParams();
-
-    useEffect(() => {
-        setDeviceName(searchParams.get('name'));
-    }, []);
-
+const DetailsContent = ({ deviceName }: { deviceName: string | null }) => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -150,4 +143,16 @@ export default function Details(): JSX.Element {
         )}
     </main>
   );
+}
+
+export default function Details(): JSX.Element {
+    const searchParams = useSearchParams();
+    const deviceName = searchParams.get('name') || null;
+    return (
+        <main className={styles.submain}>
+            <Suspense fallback={<CircularProgress />}>
+                <DetailsContent deviceName={deviceName} />
+            </Suspense>
+        </main>
+    );
 }
