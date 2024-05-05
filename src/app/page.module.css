@@ -144,9 +144,37 @@
   margin-bottom: 5rem;
 }
 
-.logo {
-  position: relative;
+.severityGuide {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
 }
+
+.severityColor {
+  width: 100px;
+  padding: 10px;
+  margin: 0 10px;
+  color: whitesmoke;
+  text-align: center;
+  border-radius: 10px;
+  font-size: 0.8rem;
+}
+
+.tableHeader {
+  background-color: #f4f4f4;
+  font-size: 1rem;
+}
+
+.tableCell {
+  font-size: 0.9rem;
+  /* text-align: center; */
+}
+
+.tablePagination {
+  background-color: #eaeaea;
+}
+
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   .card:hover {

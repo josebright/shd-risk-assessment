@@ -13,11 +13,40 @@ interface Vulnerability {
     affectedSystem: string;
     threats: string;
     impact: string;
-    metrics: { baseSeverity: string }[];
+    metrics: { 
+        baseSeverity: string, 
+        exploitabilityScore: string,
+        impactScore: string,
+        baseScore: string,
+        availabilityImpact: string,
+        integrityImpact: string
+    }[];
     vulnStatus: string;
     lastModified: string;
     recommendations: string;
 }
+
+const SeverityGuide = () => {
+    const severities = [
+      { label: 'None', color: 'green' },
+      { label: 'Low', color: 'khaki' },
+      { label: 'Medium', color: 'orange' },
+      { label: 'High', color: 'red' },
+      { label: 'Critical', color: 'darkred' }
+    ];
+  
+    return (
+      <div className={styles.severityGuide}>
+        <Grid container>
+            {severities.map((severity) => (
+                <Grid item key={severity.label} xs={2} className={styles.severityColor} style={{ backgroundColor: severity.color }}>
+                    {severity.label}
+                </Grid>
+            ))}
+        </Grid>
+      </div>
+    );
+};
 
 const DetailsContent = ({ deviceName }: { deviceName: string | null }) => {
     const [page, setPage] = useState(0);
@@ -62,7 +91,7 @@ const DetailsContent = ({ deviceName }: { deviceName: string | null }) => {
             case 'none':
                 return 'green';
             case 'low':
-                return 'yellow';
+                return 'khaki';
             case 'medium':
                 return 'orange';
             case 'high':
@@ -95,37 +124,51 @@ const DetailsContent = ({ deviceName }: { deviceName: string | null }) => {
                 </Button>
                 <h1>Vulnerability Details</h1>
                 <br/>
+                <SeverityGuide />
+                <br/>
                 <TableContainer component={Paper}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Vulnerability</TableCell>
-                            <TableCell>Affected System</TableCell>
-                            <TableCell>Threats</TableCell>
-                            <TableCell>Impact</TableCell>
-                            <TableCell>Severity</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Last Modified</TableCell>
-                            <TableCell>Recommendations</TableCell>
-                        </TableRow>
+                            <TableRow>
+                                <TableCell className={styles.tableHeader}>S/N</TableCell>
+                                <TableCell className={styles.tableHeader}>Affected Systems</TableCell>
+                                <TableCell className={styles.tableHeader}>Threats</TableCell>
+                                <TableCell className={styles.tableHeader}>Vulnerabilities</TableCell>
+                                <TableCell className={styles.tableHeader}>Likelihood Score</TableCell>
+                                <TableCell className={styles.tableHeader}>Impact</TableCell>
+                                <TableCell className={styles.tableHeader}>Impact Score</TableCell>
+                                <TableCell className={styles.tableHeader}>Risk Score</TableCell>
+                                {/* <TableCell>Status</TableCell>
+                                <TableCell>Last Modified</TableCell> */}
+                                <TableCell className={styles.tableHeader}>Recommendations</TableCell>
+                            </TableRow>
                         </TableHead>
                         <TableBody>
                             {vulnerabilityData && vulnerabilityData.length > 0 && vulnerabilityData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
                                 <TableRow key={item.id}>
-                                    <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                                    <TableCell>{item.vulnerability}</TableCell>
-                                    <TableCell>{item.affectedSystem}</TableCell>
-                                    <TableCell>{item.threats}</TableCell>
-                                    <TableCell>{item.impact}</TableCell>
-                                    <TableCell>
-                                        <Typography variant="body1" sx={{ backgroundColor: getColorForSeverity(item.metrics[0].baseSeverity), borderRadius: '20px', padding:'10px', color:'white', textAlign:'center' }}>
-                                            {item.metrics[0].baseSeverity}
+                                    <TableCell className={styles.tableCell}>{page * rowsPerPage + index + 1}</TableCell>
+                                    <TableCell className={styles.tableCell}>{item.affectedSystem}</TableCell>
+                                    <TableCell className={styles.tableCell}>{item.threats}</TableCell>
+                                    <TableCell className={styles.tableCell}>{item.vulnerability}</TableCell>
+                                    <TableCell className={styles.tableCell}>
+                                        <Typography variant="body1" sx={{ backgroundColor: getColorForSeverity(item.metrics[0].availabilityImpact), borderRadius: '20px', padding:'10px', color:'white', textAlign:'center' }}>
+                                            {item.metrics[0].exploitabilityScore}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>{item.vulnStatus}</TableCell>
-                                    <TableCell>{new Date(item.lastModified).toLocaleString()}</TableCell>
-                                    <TableCell>{item.recommendations}</TableCell>
+                                    <TableCell className={styles.tableCell}>{item.impact}</TableCell>
+                                    <TableCell className={styles.tableCell}>
+                                        <Typography variant="body1" sx={{ backgroundColor: getColorForSeverity(item.metrics[0].integrityImpact), borderRadius: '20px', padding:'10px', color:'white', textAlign:'center' }}>
+                                            {item.metrics[0].impactScore}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell className={styles.tableCell}>
+                                        <Typography variant="body1" sx={{ backgroundColor: getColorForSeverity(item.metrics[0].baseSeverity), borderRadius: '20px', padding:'10px', color:'white', textAlign:'center' }}>
+                                            {item.metrics[0].baseScore}
+                                        </Typography>
+                                    </TableCell>
+                                    {/* <TableCell className={styles.tableCell}>{item.vulnStatus}</TableCell>
+                                    <TableCell className={styles.tableCell}>{new Date(item.lastModified).toLocaleString()}</TableCell> */}
+                                    <TableCell className={styles.tableCell}>{item.recommendations}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -137,6 +180,7 @@ const DetailsContent = ({ deviceName }: { deviceName: string | null }) => {
                         page={page}
                         onPageChange={handleChangePage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
+                        className={styles.tablePagination}
                     />
                 </TableContainer>
             </div>
