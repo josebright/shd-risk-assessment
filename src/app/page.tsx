@@ -6,15 +6,21 @@ import { Button, Box, CircularProgress, MenuItem, TextField } from '@mui/materia
 import styles from "./page.module.css";
 import Link from 'next/link';
 
+interface Category {
+  id: number;
+  name: string;
+  devices: { id: number; name: string }[];
+}
 
-export default function Home() {
+interface Props {}
+
+export default function Home(props: Props): JSX.Element {
   // const router = useRouter()
-
-  const [categoryData, setCategoryData] = useState(null);
+  const [categoryData, setCategoryData] = useState<Category[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState('');
-  const [device, setDevice] = useState('');
-  const [devices, setDevices] = useState([]);
+  const [category, setCategory] = useState<string>('');
+  const [device, setDevice] = useState<string>('');
+  const [devices, setDevices] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,16 +38,16 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const handleCategoryChange = (event) => {
-    const selectedCategory = event.target.value;
+  const handleCategoryChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const selectedCategory = event.target.value as string;
     setCategory(selectedCategory);
-    const selectedDevices = categoryData.find((category) => category.name === selectedCategory)?.devices || [];
+    const selectedDevices = categoryData?.find((category) => category.name === selectedCategory)?.devices || [];
     setDevices(selectedDevices);
     setDevice('');
   };
 
-  const handleDeviceChange = (event) => {
-    setDevice(event.target.value);
+  const handleDeviceChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setDevice(event.target.value as string);
   };
 
   // const handleSubmit = (event) => {

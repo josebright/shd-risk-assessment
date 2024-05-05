@@ -1,45 +1,84 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import styles from '../page.module.css';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, Button, Grid } from '@mui/material';
+import { Typography, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, Button, Grid } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link'
 
-export default function Details() {
-    const searchParams = useSearchParams()
-    const deviceName = searchParams.get('name')
+interface Vulnerability {
+    id: number;
+    vulnerability: string;
+    affectedSystem: string;
+    threats: string;
+    impact: string;
+    metrics: { baseSeverity: string }[];
+    vulnStatus: string;
+    lastModified: string;
+    recommendations: string;
+}
+
+export default function Details(): JSX.Element {
+    const [deviceName, setDeviceName] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        setDeviceName(searchParams.get('name'));
+    }, []);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const [vulnerabilityData, setVulnerabilityData] = useState(null);
+    const [vulnerabilityData, setVulnerabilityData] = useState<Vulnerability[] | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-          try {
-            const response = await fetch(`https://ladysnazzy.tech/vulnerabilities?keywordSearch=${deviceName}`);
-            const jsonData = await response.json();
-            setVulnerabilityData(jsonData);
-            setLoading(false);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-            setLoading(false);
-          }
+            try {
+                if (deviceName) {
+                    const response = await fetch(`https://ladysnazzy.tech/vulnerabilities?keywordSearch=${deviceName}`);
+                    const jsonData = await response.json();
+                    setVulnerabilityData(jsonData);
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setLoading(false);
+            }
         };
     
-        fetchData();
+        if (deviceName) {
+            fetchData();
+        }
     }, [deviceName]);
+    
 
-    const handleChangePage = (event, newPage) => {
+    const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
     };
-      
-    const handleChangeRowsPerPage = (event) => {
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
+    };
+
+    const getColorForSeverity = (severity: string): string => {
+        const severityLowerCase = severity.toLowerCase();
+        switch (severityLowerCase) {
+            case 'none':
+                return 'green';
+            case 'low':
+                return 'yellow';
+            case 'medium':
+                return 'orange';
+            case 'high':
+                return 'red';
+            case 'critical':
+                return 'darkred';
+            default:
+                return 'primary';
+        }
     };
 
 
@@ -79,24 +118,28 @@ export default function Details() {
                         </TableRow>
                         </TableHead>
                         <TableBody>
-                        {vulnerabilityData?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((item, index) => (
-                            <TableRow key={item.id}>
-                                <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                                <TableCell>{item.vulnerability}</TableCell>
-                                <TableCell>{item.affectedSystem}</TableCell>
-                                <TableCell>{item.threats}</TableCell>
-                                <TableCell>{item.impact}</TableCell>
-                                <TableCell>{item.metrics[0].baseSeverity}</TableCell>
-                                <TableCell>{item.vulnStatus}</TableCell>
-                                <TableCell>{new Date(item.lastModified).toLocaleString()}</TableCell>
-                                <TableCell>{item.recommendations}</TableCell>
-                            </TableRow>
-                        ))}
+                            {vulnerabilityData && vulnerabilityData.length > 0 && vulnerabilityData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => (
+                                <TableRow key={item.id}>
+                                    <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                                    <TableCell>{item.vulnerability}</TableCell>
+                                    <TableCell>{item.affectedSystem}</TableCell>
+                                    <TableCell>{item.threats}</TableCell>
+                                    <TableCell>{item.impact}</TableCell>
+                                    <TableCell>
+                                        <Typography variant="body1" sx={{ backgroundColor: getColorForSeverity(item.metrics[0].baseSeverity), borderRadius: '20px', padding:'10px', color:'white', textAlign:'center' }}>
+                                            {item.metrics[0].baseSeverity}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>{item.vulnStatus}</TableCell>
+                                    <TableCell>{new Date(item.lastModified).toLocaleString()}</TableCell>
+                                    <TableCell>{item.recommendations}</TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
                     </Table>
                     <TablePagination
                         component="div"
-                        count={vulnerabilityData.length}
+                        count={vulnerabilityData ? vulnerabilityData.length : 0}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}
