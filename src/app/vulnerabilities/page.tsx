@@ -122,7 +122,7 @@ const DetailsContent = ({ deviceName }: { deviceName: string | null }) => {
                         </Grid>
                     </Link>
                 </Button>
-                <h1>Vulnerability Details</h1>
+                <h1>Risk Assessment Details</h1>
                 <br/>
                 <SeverityGuide />
                 <br/>
